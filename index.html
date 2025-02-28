@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent Receipt Generator</title>
+    <meta name="description" content="Generate professional rent receipts instantly with the Rent Receipt Generator. Easily create, print, or download rent receipts for hassle-free documentation.">
+    <meta name="keywords" content="rent receipt generator, online rent receipt, rent receipt format, house rent receipt, printable rent receipt, tenant rent receipt">
+    <meta name="author" content="Vishwas R">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Rent Receipt Generator - Create & Print Rent Receipts Online">
+    <meta property="og:description" content="Easily generate professional rent receipts online. Enter details, print, or save your rent receipts instantly. Perfect for tenants & landlords.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/vishwas-r/Rent-Receipt-Generator">
+    <meta property="og:image" content="https://github.com/vishwas-r/Rent-Receipt-Generator/raw/main/assets/house-rent.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rent Receipt Generator - Quick & Easy Rent Receipts">
+    <meta name="twitter:description" content="Generate and print rent receipts online in minutes. Simple, fast, and reliable rent receipt creator for tenants and landlords.">
+    <meta name="twitter:image" content="https://github.com/vishwas-r/Rent-Receipt-Generator/raw/main/assets/house-rent.jpg">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #fff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        .receipt {
+            border: 1px solid #9092a3;
+            padding: 20px;
+            background: white;
+            margin-bottom: 20px;
+            color: #9092a3;
+        }
+        .receipt-header {
+            align-items: center;
+            font-size: 16px;
+            color: black;
+        }
+        .receipt-body {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .landlord {
+            margin-top: 20px;
+            color: #9092a3;
+        }
+        p {
+            font-weight: 500;
+            color: #9092a3;
+            font-size: 20px;
+        }
+        .receipt p {
+            font-size: 18px;
+        }
+        #receipt-container {
+            margin: auto;        
+        }
+        @media print {
+            .receipt {
+                border: 1px solid #9092a3 !important;
+                box-shadow: none !important;
+                font-size: 14px !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-inside: avoid;
+            }
+
+            .receipt::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 2px solid #9092a3;
+                pointer-events: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Rent Receipt Generator</h2>
+    <p>Generate rent receipts instantly with our <b>Rent Receipt Generator</b>. Simply enter your details, and get professionally formatted receipts for each month with accurate dates and payment records. Print or save them for hassle-free documentation. Perfect for tenants and landlords to maintain a clear rental history!</p>
+    <div class="card p-4 shadow-sm">
+        <form id="rent-form">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="tenant-name" class="form-label">Tenant Name:</label>
+                    <input type="text" class="form-control" id="tenant-name" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="house-address" class="form-label">House Address:</label>
+                    <input type="text" class="form-control" id="house-address" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="rent-amount" class="form-label">Rent Amount (INR):</label>
+                    <input type="number" class="form-control" id="rent-amount" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="period-from" class="form-label">Period From:</label>
+                    <input type="date" class="form-control" id="period-from" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="period-to" class="form-label">Period To:</label>
+                    <input type="date" class="form-control" id="period-to" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="owner-name" class="form-label">Owner Name:</label>
+                <input type="text" class="form-control" id="owner-name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="owner-pan" class="form-label">Owner PAN (Optional):</label>
+                <input type="text" class="form-control" id="owner-pan" maxlength="10">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Generate Rent Receipt</button>
+        </form>
+    </div>
+
+    <div class="text-center mt-5">
+        <button id="print-button" class="btn btn-secondary d-none" onclick="printReceipts()">Print Receipts</button>
+    </div>
+    <div id="receipt-container" class="mt-4 p-1"></div>
+</div>
+
+<script>
+    document.getElementById('rent-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        var tenantName = document.getElementById('tenant-name').value;
+        var houseAddress = document.getElementById('house-address').value;
+        var rentAmount = document.getElementById('rent-amount').value;
+        var periodFrom = new Date(document.getElementById('period-from').value);
+        var periodTo = new Date(document.getElementById('period-to').value);
+        var ownerName = document.getElementById('owner-name').value;
+        var ownerPAN = document.getElementById('owner-pan').value.trim();
+
+        var receiptContainer = document.getElementById('receipt-container');
+        receiptContainer.innerHTML = '';
+
+        var currentDate = new Date(periodFrom);
+
+        while (currentDate <= periodTo) {
+            var firstDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            var lastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+            var receiptMonth = firstDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            var receiptDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+            var panHTML = ownerPAN ? `<div class="text-muted">PAN: <strong>${ownerPAN}</strong></div>` : '';
+
+            var receiptHTML = `
+                <div class="card mb-5 p-3 receipt border">
+                    <div class="receipt-header mb-2">
+                        <div class="text-center">
+                            <h4><strong>RENT RECEIPT</strong> &nbsp;<span class="text-muted">${receiptMonth}</span></h4>
+                        </div>
+                        <div style="text-align: right; margin-top: -20px;">
+                            <p style="margin: 0">Receipt No: ${receiptContainer.children.length + 1}</p>
+                            <p>Date: ${receiptDate}</p>
+                        </div>
+                    </div>
+                    <div class="receipt-body">
+                        <p>Received sum of INR <strong>Rs.${rentAmount}</strong> from <strong>${tenantName}</strong>
+                        towards the rent of property located at <strong>${houseAddress}</strong> 
+                        for the period from <strong>${firstDate.toLocaleDateString('en-GB')}</strong> 
+                        to <strong>${lastDate.toLocaleDateString('en-GB')}</strong>.</p>
+                    </div>
+                    <div class="text-end landlord">
+                        <strong>${ownerName}</strong> <span>(Landlord)</span>
+                        ${panHTML}
+                    </div>
+                </div>
+            `;
+
+            receiptContainer.innerHTML += receiptHTML;
+
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+
+        document.getElementById('print-button').classList.remove('d-none');
+    });
+
+    function printReceipts() {
+        var printContent = document.getElementById('receipt-container').innerHTML;
+        var originalContent = document.body.innerHTML;
+        
+        document.body.innerHTML = printContent;
+        window.print();
+        document.body.innerHTML = originalContent;
+    }
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
